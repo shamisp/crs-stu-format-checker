@@ -17,15 +17,18 @@
 
 for ff in `ls *.crs | awk -F. '{print $1}'` ;
 	do echo ">>> Processing $ff files <<<"
+	error=0
 	for c in `cat $ff.crs  | tail -n +2 | awk '{print $1}'` ; do  
-		if [ `grep -c ^"\<$c\>"  $ff.crs` -gt 1 ]; then 
+		if [ `cat $ff.crs | tail -n +2 | grep -c ^"\<$c\>"` -gt 1 ]; then 
 			echo Error ${ff}.crs: Duplicated $c in ${ff}.crs file - found `grep -c ^"\<$c\>"  $ff.crs` 
+			error=1
 			break 
 		fi 
 		stu_cnt=`grep -c "\<$c\>" $ff.stu | tr -d "\r "`
-		crs_cnt=`grep   ^"\<$c\>" $ff.crs | awk '{print $2}'| tr -d "\r "` 
+		crs_cnt=`cat  $ff.crs | tail -n +2 | grep   ^"\<$c\>" | awk '{print $2}'| tr -d "\r "` 
 		if [ $stu_cnt -ne $crs_cnt ]; then 
 			echo "Error ${ff}.stu: course $c is expected $crs_cnt (according ${ff}.crs) but found $stu_cnt"
+			error=1
 		fi
 	done
 done 
